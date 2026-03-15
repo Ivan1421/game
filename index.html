@@ -1,48 +1,1130 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ЕВРОПА: БИТВА ЗА КОНТИНЕНТ</title>
     <style>
-        body { margin: 0; background: #1a1a2e; }
-        .game-container { display: flex; height: 100vh; }
-        .sidebar { width: 250px; background: #16213e; color: white; padding: 20px; }
-        .map-container { flex: 1; padding: 20px; }
-        #europeMap { width: 100%; height: 100%; background: #0a1a2f; }
-        .region { cursor: pointer; transition: all 0.3s; }
-        .region:hover { filter: brightness(1.3); stroke: #e94560; stroke-width: 2; }
-        .info-panel { margin-top: 20px; padding: 15px; background: #1f2a48; border-radius: 10px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cinzel', 'Georgia', serif;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&display=swap');
+
+        body {
+            background: linear-gradient(135deg, #0a0f1e 0%, #1a1f2e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-wrapper {
+            width: 1800px;
+            max-width: 100%;
+            background: rgba(10, 15, 30, 0.95);
+            border-radius: 30px;
+            padding: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), 0 0 0 2px #2a3045 inset;
+        }
+
+        /* Шапка с ресурсами */
+        .header {
+            background: linear-gradient(180deg, #232845 0%, #14182f 100%);
+            border-radius: 20px;
+            padding: 15px 30px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid #3f4a7a;
+            box-shadow: 0 5px 0 #0a0d1a;
+            position: relative;
+        }
+
+        .header::before {
+            content: "⚔️ IMPERIUM EUROPA ⚔️";
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #e94560;
+            color: white;
+            padding: 5px 30px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            box-shadow: 0 3px 0 #8a1f2f;
+            white-space: nowrap;
+        }
+
+        .resources {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .resource {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #0b0f21;
+            padding: 10px 20px;
+            border-radius: 15px;
+            border: 1px solid #4f5a8f;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5), 0 3px 0 #1f2440;
+        }
+
+        .resource-icon {
+            font-size: 1.5em;
+        }
+
+        .resource-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .resource-label {
+            font-size: 0.7em;
+            color: #aab3d9;
+            text-transform: uppercase;
+        }
+
+        .resource-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #fff;
+            line-height: 1;
+        }
+
+        .turn-box {
+            background: #0b0f21;
+            padding: 10px 25px;
+            border-radius: 15px;
+            border: 1px solid #4f5a8f;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .turn-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #e94560;
+            text-shadow: 0 2px 0 #8a1f2f;
+        }
+
+        .btn {
+            background: linear-gradient(180deg, #e94560 0%, #b32b41 100%);
+            border: none;
+            color: white;
+            font-weight: bold;
+            padding: 10px 25px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 3px solid #6e1a2a;
+            transition: all 0.1s;
+            font-family: 'Cinzel', serif;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+            border-bottom-width: 1px;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(180deg, #3f4a7a 0%, #262e50 100%);
+            border-bottom-color: #12172f;
+        }
+
+        /* Основная область */
+        .main-area {
+            display: flex;
+            gap: 20px;
+            min-height: 700px;
+        }
+
+        /* Боковая панель */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #1b203a 0%, #12172c 100%);
+            border-radius: 20px;
+            padding: 20px;
+            border: 2px solid #3f4a7a;
+            box-shadow: 0 5px 0 #0a0d1a;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar h2 {
+            color: #e94560;
+            font-size: 1.2em;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3f4a7a;
+            letter-spacing: 2px;
+        }
+
+        .countries-list {
+            max-height: 400px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding-right: 5px;
+        }
+
+        .countries-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .countries-list::-webkit-scrollbar-track {
+            background: #1f2440;
+            border-radius: 10px;
+        }
+
+        .countries-list::-webkit-scrollbar-thumb {
+            background: #e94560;
+            border-radius: 10px;
+        }
+
+        .country-item {
+            background: #262e50;
+            padding: 8px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid transparent;
+            border-bottom: 2px solid #12172f;
+        }
+
+        .country-item:hover {
+            background: #2f3860;
+            transform: translateX(3px);
+        }
+
+        .country-item.selected {
+            border-left-color: #e94560;
+            background: #2f3860;
+            box-shadow: 0 0 15px rgba(233, 69, 96, 0.3);
+        }
+
+        .country-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 3px black;
+        }
+
+        .country-name {
+            flex: 1;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .country-stats {
+            font-size: 0.8em;
+            background: #1a1f3a;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .info-panel {
+            background: #1a1f3a;
+            border-radius: 15px;
+            padding: 15px;
+            border: 1px solid #3f4a7a;
+            margin-top: auto;
+        }
+
+        .info-panel h3 {
+            color: #e94560;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            text-align: center;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            color: #aab3d9;
+        }
+
+        .info-value {
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Карта */
+        .map-container {
+            flex: 1;
+            background: #0a1a2f;
+            border-radius: 20px;
+            padding: 20px;
+            border: 2px solid #3f4a7a;
+            box-shadow: 0 5px 0 #0a0d1a;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .map-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(10, 30, 50, 0.3), rgba(0, 5, 15, 0.7));
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        #europeMap {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.5));
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Панель действий */
+        .action-panel {
+            width: 280px;
+            background: linear-gradient(180deg, #1b203a 0%, #12172c 100%);
+            border-radius: 20px;
+            padding: 20px;
+            border: 2px solid #3f4a7a;
+            box-shadow: 0 5px 0 #0a0d1a;
+        }
+
+        .action-panel h3 {
+            color: #e94560;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            border-bottom: 2px solid #3f4a7a;
+            padding-bottom: 10px;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: linear-gradient(180deg, #2f3860 0%, #1f2645 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9em;
+            border-bottom: 3px solid #12172f;
+            font-family: 'Cinzel', serif;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            background: linear-gradient(180deg, #3f4a7a 0%, #2f3860 100%);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .action-btn.attack {
+            background: linear-gradient(180deg, #b32b41 0%, #8a1f2f 100%);
+        }
+
+        .cost-badge {
+            margin-left: auto;
+            background: #0b0f21;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            border: 1px solid #4f5a8f;
+        }
+
+        .warning {
+            color: #e94560;
+            font-size: 0.8em;
+            text-align: center;
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(233, 69, 96, 0.1);
+            border-radius: 8px;
+            border: 1px solid #e94560;
+        }
+
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(180deg, #1b203a 0%, #12172c 100%);
+            padding: 30px;
+            border-radius: 20px;
+            border: 3px solid #e94560;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            color: white;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Cinzel', serif;
+        }
+
+        .modal-btn.yes {
+            background: #e94560;
+            color: white;
+        }
+
+        .modal-btn.no {
+            background: #3f4a7a;
+            color: white;
+        }
+
+        /* Тосты */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #1b203a;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            border-left: 5px solid #e94560;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            animation: slideIn 0.3s;
+            z-index: 2000;
+            font-weight: bold;
+        }
+
+        .toast.success { border-left-color: #00c851; }
+        .toast.error { border-left-color: #e94560; }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <div class="sidebar">
-            <h2>Европейская стратегия</h2>
-            <div class="info-panel" id="info">
-                <p>Выберите страну на карте</p>
+    <div class="game-wrapper">
+        <!-- Шапка с ресурсами -->
+        <div class="header">
+            <div class="resources">
+                <div class="resource">
+                    <span class="resource-icon">💰</span>
+                    <div class="resource-info">
+                        <span class="resource-label">Золото</span>
+                        <span class="resource-value" id="gold">1500</span>
+                    </div>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">🌾</span>
+                    <div class="resource-info">
+                        <span class="resource-label">Еда</span>
+                        <span class="resource-value" id="food">800</span>
+                    </div>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">⚔️</span>
+                    <div class="resource-info">
+                        <span class="resource-label">Армия</span>
+                        <span class="resource-value" id="army">50</span>
+                    </div>
+                </div>
+                <div class="resource">
+                    <span class="resource-icon">🔬</span>
+                    <div class="resource-info">
+                        <span class="resource-label">Технологии</span>
+                        <span class="resource-value" id="tech">1</span>
+                    </div>
+                </div>
+            </div>
+            <div class="turn-box">
+                <span>Ход</span>
+                <span class="turn-number" id="turn">1</span>
+                <button class="btn" id="endTurnBtn">Завершить ход</button>
             </div>
         </div>
-        
-        <div class="map-container">
-            <object id="europeMap" type="image/svg+xml" data="map.svg" width="100%" height="100%"></object>
+
+        <!-- Основная область -->
+        <div class="main-area">
+            <!-- Левая панель -->
+            <div class="sidebar">
+                <h2>⚔️ СТРАНЫ ЕВРОПЫ ⚔️</h2>
+                <div class="countries-list" id="countriesList">
+                    <!-- Список будет заполнен через JavaScript -->
+                </div>
+                
+                <div class="info-panel" id="selectedInfo">
+                    <h3>🏰 ИНФОРМАЦИЯ</h3>
+                    <div class="info-row">
+                        <span>Выберите страну</span>
+                        <span class="info-value">на карте</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карта -->
+            <div class="map-container">
+                <object id="europeMap" type="image/svg+xml" data="Blank_Europe_Map.svg" width="100%" height="100%">
+                    Ваш браузер не поддерживает SVG
+                </object>
+            </div>
+
+            <!-- Правая панель действий -->
+            <div class="action-panel">
+                <h3>⚡ ДЕЙСТВИЯ ⚡</h3>
+                <div id="actionButtons">
+                    <p style="color: #aab3d9; text-align: center;">👆 Выберите страну на карте</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Подтверждение</h3>
+            <p id="modalMessage"></p>
+            <div class="modal-buttons">
+                <button class="modal-btn yes" id="modalConfirm">Да</button>
+                <button class="modal-btn no" id="modalCancel">Нет</button>
+            </div>
         </div>
     </div>
 
     <script>
-        document.getElementById('europeMap').addEventListener('load', function() {
-            const svgDoc = this.contentDocument;
-            const paths = svgDoc.querySelectorAll('path');
+        // Данные о странах Европы (с Россией)
+        const countriesData = {
+            'Russia': { 
+                name: 'Россия', 
+                color: '#0033A0', 
+                gold: 2000, 
+                food: 1500, 
+                army: 80, 
+                tech: 2, 
+                capital: 'Москва' 
+            },
+            'Germany': { 
+                name: 'Германия', 
+                color: '#000000', 
+                gold: 1800, 
+                food: 900, 
+                army: 60, 
+                tech: 3, 
+                capital: 'Берлин' 
+            },
+            'France': { 
+                name: 'Франция', 
+                color: '#0055A4', 
+                gold: 1700, 
+                food: 1000, 
+                army: 55, 
+                tech: 2, 
+                capital: 'Париж' 
+            },
+            'United Kingdom': { 
+                name: 'Великобритания', 
+                color: '#1E3A8A', 
+                gold: 1900, 
+                food: 800, 
+                army: 50, 
+                tech: 3, 
+                capital: 'Лондон' 
+            },
+            'Italy': { 
+                name: 'Италия', 
+                color: '#008C45', 
+                gold: 1500, 
+                food: 900, 
+                army: 45, 
+                tech: 2, 
+                capital: 'Рим' 
+            },
+            'Spain': { 
+                name: 'Испания', 
+                color: '#AA151B', 
+                gold: 1400, 
+                food: 850, 
+                army: 40, 
+                tech: 2, 
+                capital: 'Мадрид' 
+            },
+            'Poland': { 
+                name: 'Польша', 
+                color: '#DC143C', 
+                gold: 1200, 
+                food: 950, 
+                army: 48, 
+                tech: 1, 
+                capital: 'Варшава' 
+            },
+            'Ukraine': { 
+                name: 'Украина', 
+                color: '#FFD700', 
+                gold: 1100, 
+                food: 1200, 
+                army: 52, 
+                tech: 1, 
+                capital: 'Киев' 
+            },
+            'Sweden': { 
+                name: 'Швеция', 
+                color: '#006AA7', 
+                gold: 1300, 
+                food: 700, 
+                army: 35, 
+                tech: 2, 
+                capital: 'Стокгольм' 
+            },
+            'Norway': { 
+                name: 'Норвегия', 
+                color: '#BA0C2F', 
+                gold: 1600, 
+                food: 600, 
+                army: 30, 
+                tech: 2, 
+                capital: 'Осло' 
+            },
+            'Finland': { 
+                name: 'Финляндия', 
+                color: '#003580', 
+                gold: 1250, 
+                food: 650, 
+                army: 28, 
+                tech: 2, 
+                capital: 'Хельсинки' 
+            },
+            'Greece': { 
+                name: 'Греция', 
+                color: '#0D5EAF', 
+                gold: 1000, 
+                food: 700, 
+                army: 32, 
+                tech: 2, 
+                capital: 'Афины' 
+            },
+            'Portugal': { 
+                name: 'Португалия', 
+                color: '#006600', 
+                gold: 1150, 
+                food: 750, 
+                army: 28, 
+                tech: 2, 
+                capital: 'Лиссабон' 
+            },
+            'Netherlands': { 
+                name: 'Нидерланды', 
+                color: '#AE1C28', 
+                gold: 1650, 
+                food: 700, 
+                army: 32, 
+                tech: 2, 
+                capital: 'Амстердам' 
+            },
+            'Belgium': { 
+                name: 'Бельгия', 
+                color: '#000000', 
+                gold: 1450, 
+                food: 650, 
+                army: 25, 
+                tech: 2, 
+                capital: 'Брюссель' 
+            },
+            'Austria': { 
+                name: 'Австрия', 
+                color: '#ED2939', 
+                gold: 1250, 
+                food: 600, 
+                army: 28, 
+                tech: 2, 
+                capital: 'Вена' 
+            },
+            'Switzerland': { 
+                name: 'Швейцария', 
+                color: '#FF0000', 
+                gold: 2000, 
+                food: 500, 
+                army: 20, 
+                tech: 3, 
+                capital: 'Берн' 
+            },
+            'Czech Republic': { 
+                name: 'Чехия', 
+                color: '#11457E', 
+                gold: 1150, 
+                food: 700, 
+                army: 30, 
+                tech: 2, 
+                capital: 'Прага' 
+            },
+            'Hungary': { 
+                name: 'Венгрия', 
+                color: '#436F4D', 
+                gold: 1050, 
+                food: 750, 
+                army: 32, 
+                tech: 1, 
+                capital: 'Будапешт' 
+            },
+            'Romania': { 
+                name: 'Румыния', 
+                color: '#002B7F', 
+                gold: 1000, 
+                food: 850, 
+                army: 38, 
+                tech: 1, 
+                capital: 'Бухарест' 
+            },
+            'Bulgaria': { 
+                name: 'Болгария', 
+                color: '#FFFFFF', 
+                gold: 900, 
+                food: 750, 
+                army: 30, 
+                tech: 1, 
+                capital: 'София' 
+            },
+            'Serbia': { 
+                name: 'Сербия', 
+                color: '#003399', 
+                gold: 850, 
+                food: 700, 
+                army: 32, 
+                tech: 1, 
+                capital: 'Белград' 
+            },
+            'Croatia': { 
+                name: 'Хорватия', 
+                color: '#FF0000', 
+                gold: 900, 
+                food: 650, 
+                army: 25, 
+                tech: 1, 
+                capital: 'Загреб' 
+            },
+            'Denmark': { 
+                name: 'Дания', 
+                color: '#C8102E', 
+                gold: 1350, 
+                food: 600, 
+                army: 28, 
+                tech: 2, 
+                capital: 'Копенгаген' 
+            },
+            'Ireland': { 
+                name: 'Ирландия', 
+                color: '#169B62', 
+                gold: 1250, 
+                food: 750, 
+                army: 22, 
+                tech: 2, 
+                capital: 'Дублин' 
+            },
+            'Iceland': { 
+                name: 'Исландия', 
+                color: '#003897', 
+                gold: 1100, 
+                food: 400, 
+                army: 10, 
+                tech: 2, 
+                capital: 'Рейкьявик' 
+            }
+        };
+
+        // Состояние игры
+        let gameState = {
+            turn: 1,
+            currentPlayer: 'Russia', // Игрок начинает за Россию
+            countries: JSON.parse(JSON.stringify(countriesData)),
+            selectedCountry: null,
+            svgDocument: null
+        };
+
+        // Инициализация игры
+        function initGame() {
+            createCountriesList();
+            updateResourcesDisplay();
+            updateActionPanel();
+            selectCountry('Russia');
+            
+            document.getElementById('endTurnBtn').addEventListener('click', endTurn);
+            
+            // Ждем загрузки SVG
+            const mapObject = document.getElementById('europeMap');
+            mapObject.addEventListener('load', function() {
+                gameState.svgDocument = mapObject.contentDocument;
+                setupMapInteractivity();
+            });
+        }
+
+        // Настройка интерактивности карты
+        function setupMapInteractivity() {
+            if (!gameState.svgDocument) return;
+            
+            // Находим все path элементы в SVG
+            const paths = gameState.svgDocument.querySelectorAll('path');
             
             paths.forEach(path => {
+                // Добавляем класс для стилизации
                 path.classList.add('region');
-                path.addEventListener('click', function() {
-                    const countryId = this.id || 'unknown';
-                    document.getElementById('info').innerHTML = `
-                        <h3>Выбрана страна</h3>
-                        <p>ID: ${countryId}</p>
-                        <p>Название: ${this.getAttribute('title') || 'Неизвестно'}</p>
-                    `;
+                
+                // Пытаемся определить страну по ID или названию
+                const pathId = path.id || path.getAttribute('title') || '';
+                let countryCode = null;
+                
+                // Ищем соответствие в наших данных
+                for (const code in countriesData) {
+                    if (pathId.toLowerCase().includes(code.toLowerCase()) || 
+                        countriesData[code].name.toLowerCase().includes(pathId.toLowerCase())) {
+                        countryCode = code;
+                        break;
+                    }
+                }
+                
+                // Если нашли страну, добавляем data-атрибут
+                if (countryCode) {
+                    path.dataset.country = countryCode;
+                    
+                    // Устанавливаем цвет страны
+                    path.setAttribute('fill', countriesData[countryCode].color);
+                } else {
+                    // Для неизвестных регионов - нейтральный цвет
+                    path.setAttribute('fill', '#CCCCCC');
+                }
+                
+                // Добавляем обработчик клика
+                path.addEventListener('click', function(e) {
+                    const countryCode = this.dataset.country;
+                    if (countryCode && gameState.countries[countryCode]) {
+                        selectCountry(countryCode);
+                    } else {
+                        // Если регион неизвестен
+                        gameState.selectedCountry = null;
+                        document.getElementById('selectedInfo').innerHTML = `
+                            <h3>🌍 Нейтральная территория</h3>
+                            <div class="info-row">
+                                <span>Статус:</span>
+                                <span class="info-value">Незанятая земля</span>
+                            </div>
+                        `;
+                        updateActionPanel();
+                    }
+                });
+                
+                // Добавляем подсветку при наведении
+                path.addEventListener('mouseenter', function() {
+                    this.style.filter = 'brightness(1.3)';
+                });
+                
+                path.addEventListener('mouseleave', function() {
+                    this.style.filter = 'none';
                 });
             });
-        });
+        }
+
+        // Создание списка стран
+        function createCountriesList() {
+            const container = document.getElementById('countriesList');
+            container.innerHTML = '';
+
+            // Сортируем страны по алфавиту
+            const sortedCountries = Object.entries(gameState.countries)
+                .sort(([, a], [, b]) => a.name.localeCompare(b.name));
+
+            sortedCountries.forEach(([code, country]) => {
+                const div = document.createElement('div');
+                div.className = `country-item ${code === gameState.currentPlayer ? 'selected' : ''}`;
+                div.dataset.country = code;
+
+                div.innerHTML = `
+                    <div class="country-color" style="background: ${country.color}"></div>
+                    <span class="country-name">${country.name}</span>
+                    <span class="country-stats">⚔️ ${country.army}</span>
+                `;
+
+                div.addEventListener('click', () => selectCountry(code));
+                container.appendChild(div);
+            });
+        }
+
+        // Выбор страны
+        function selectCountry(countryCode) {
+            gameState.selectedCountry = countryCode;
+            
+            // Обновляем подсветку в списке
+            document.querySelectorAll('.country-item').forEach(item => {
+                item.classList.toggle('selected', item.dataset.country === countryCode);
+            });
+            
+            // Подсвечиваем на карте
+            if (gameState.svgDocument) {
+                const paths = gameState.svgDocument.querySelectorAll('path');
+                paths.forEach(path => {
+                    path.classList.remove('selected');
+                    if (path.dataset.country === countryCode) {
+                        path.classList.add('selected');
+                    }
+                });
+            }
+
+            // Показываем информацию о стране
+            const country = gameState.countries[countryCode];
+            document.getElementById('selectedInfo').innerHTML = `
+                <h3>🏰 ${country.name}</h3>
+                <div class="info-row">
+                    <span>Столица:</span>
+                    <span class="info-value">${country.capital}</span>
+                </div>
+                <div class="info-row">
+                    <span>💰 Золото:</span>
+                    <span class="info-value">${country.gold}</span>
+                </div>
+                <div class="info-row">
+                    <span>🌾 Еда:</span>
+                    <span class="info-value">${country.food}</span>
+                </div>
+                <div class="info-row">
+                    <span>⚔️ Армия:</span>
+                    <span class="info-value">${country.army}</span>
+                </div>
+                <div class="info-row">
+                    <span>🔬 Технологии:</span>
+                    <span class="info-value">${country.tech}</span>
+                </div>
+            `;
+
+            updateActionPanel();
+        }
+
+        // Обновление панели действий
+        function updateActionPanel() {
+            const container = document.getElementById('actionButtons');
+            const player = gameState.countries[gameState.currentPlayer];
+            const selected = gameState.selectedCountry;
+
+            let html = '';
+
+            if (!selected) {
+                html = '<p style="color: #aab3d9; text-align: center;">👆 Выберите страну на карте</p>';
+            } else if (selected === gameState.currentPlayer) {
+                // Своя страна
+                html = `
+                    <button class="action-btn" onclick="developCountry()" ${player.gold < 200 ? 'disabled' : ''}>
+                        <span>📈</span> Развивать экономику
+                        <span class="cost-badge">200💰</span>
+                    </button>
+                    <button class="action-btn" onclick="recruitTroops()" ${player.gold < 300 ? 'disabled' : ''}>
+                        <span>⚔️</span> Набрать войска
+                        <span class="cost-badge">300💰</span>
+                    </button>
+                    <button class="action-btn" onclick="buildDefenses()" ${player.gold < 400 ? 'disabled' : ''}>
+                        <span>🏰</span> Укрепить оборону
+                        <span class="cost-badge">400💰</span>
+                    </button>
+                `;
+            } else {
+                // Чужая страна
+                const enemy = gameState.countries[selected];
+                if (enemy) {
+                    const canAttack = player.army > enemy.army * 0.8;
+                    
+                    html = `
+                        <button class="action-btn attack" onclick="attackCountry()" ${!canAttack ? 'disabled' : ''}>
+                            <span>⚔️</span> Атаковать
+                            <span class="cost-badge">${enemy.army}⚔️ vs ${player.army}⚔️</span>
+                        </button>
+                        ${!canAttack ? '<p class="warning">⚠️ Слишком опасно! Нужно больше войск</p>' : ''}
+                    `;
+                }
+            }
+
+            // Кнопка исследования технологий (всегда доступна)
+            const techCost = player.tech * 500;
+            html += `
+                <button class="action-btn" onclick="researchTech()" ${player.gold < techCost ? 'disabled' : ''}>
+                    <span>🔬</span> Исследовать технологии
+                    <span class="cost-badge">${techCost}💰</span>
+                </button>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        // Функции действий
+        function developCountry() {
+            const player = gameState.countries[gameState.currentPlayer];
+            if (player.gold >= 200) {
+                player.gold -= 200;
+                showMessage(`✅ Экономика развита! Доход увеличен`, 'success');
+                updateResourcesDisplay();
+                updateActionPanel();
+            }
+        }
+
+        function recruitTroops() {
+            const player = gameState.countries[gameState.currentPlayer];
+            if (player.gold >= 300) {
+                player.gold -= 300;
+                player.army += 10;
+                showMessage(`✅ Набрано 10 новых войск! Армия: ${player.army}`, 'success');
+                updateResourcesDisplay();
+                updateActionPanel();
+                createCountriesList();
+            }
+        }
+
+        function buildDefenses() {
+            const player = gameState.countries[gameState.currentPlayer];
+            if (player.gold >= 400) {
+                player.gold -= 400;
+                showMessage(`✅ Укрепления построены! Защита +25%`, 'success');
+                updateResourcesDisplay();
+                updateActionPanel();
+            }
+        }
+
+        function attackCountry() {
+            const player = gameState.countries[gameState.currentPlayer];
+            const enemyCode = gameState.selectedCountry;
+            const enemy = gameState.countries[enemyCode];
+
+            if (!enemy) return;
+
+            // Расчет битвы
+            const playerPower = player.army * player.tech;
+            const enemyPower = enemy.army * enemy.tech;
+
+            let message = '';
+            let success = false;
+
+            if (playerPower > enemyPower) {
+                // Победа
+                const losses = Math.floor(player.army * 0.3);
+                player.army -= losses;
+                enemy.army = Math.floor(enemy.army * 0.2);
+                
+                message = `✅ Победа! Захвачена ${enemy.name}. Потери: ${losses}`;
+                success = true;
+            } else {
+                // Поражение
+                const losses = Math.floor(player.army * 0.5);
+                player.army -= losses;
+                message = `❌ Поражение! Потеряно ${losses} войск`;
+            }
+
+            showMessage(message, success ? 'success' : 'error');
+            updateResourcesDisplay();
+            updateActionPanel();
+            createCountriesList();
+        }
+
+        function researchTech() {
+            const player = gameState.countries[gameState.currentPlayer];
+            const cost = player.tech * 500;
+
+            if (player.gold >= cost) {
+                player.gold -= cost;
+                player.tech += 1;
+                showMessage(`✅ Исследован уровень ${player.tech} технологий!`, 'success');
+                updateResourcesDisplay();
+                updateActionPanel();
+            }
+        }
+
+        // Завершение хода
+        function endTurn() {
+            gameState.turn++;
+
+            // Производство ресурсов для всех стран
+            Object.values(gameState.countries).forEach(country => {
+                country.gold += 100 + (country.tech * 30);
+                country.food += 50;
+                country.army = Math.min(country.army + 3, 100);
+            });
+
+            updateResourcesDisplay();
+            document.getElementById('turn').textContent = gameState.turn;
+            showMessage(`🔄 Ход ${gameState.turn} начался!`, 'success');
+            updateActionPanel();
+            createCountriesList();
+        }
+
+        // Обновление отображения ресурсов
+        function updateResourcesDisplay() {
+            const player = gameState.countries[gameState.currentPlayer];
+            document.getElementById('gold').textContent = player.gold;
+            document.getElementById('food').textContent = player.food;
+            document.getElementById('army').textContent = player.army;
+            document.getElementById('tech').textContent = player.tech;
+        }
+
+        // Показ сообщений
+        function showMessage(text, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = text;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Запуск игры
+        document.addEventListener('DOMContentLoaded', initGame);
     </script>
 </body>
 </html>
