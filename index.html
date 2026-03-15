@@ -680,4 +680,344 @@
         // Состояние игры
         let gameState = {
             turn: 1,
-            currentPlayer: "FR", // Игрок
+            currentPlayer: "FR", // Игрок начинает за Францию
+            countries: JSON.parse(JSON.stringify(countriesData)),
+            selectedRegion: null
+        };
+
+        // Инициализация игры
+        function initGame() {
+            createCountriesList();
+            setupMapClickHandlers();
+            updateResourcesDisplay();
+            updateActionPanel();
+            selectCountry("FR");
+            
+            // Добавляем обработчик завершения хода
+            document.getElementById('endTurnBtn').addEventListener('click', endTurn);
+        }
+
+        // Создание списка стран
+        function createCountriesList() {
+            const container = document.getElementById('countriesList');
+            container.innerHTML = '';
+
+            // Сортируем страны по алфавиту
+            const sortedCountries = Object.entries(gameState.countries)
+                .sort(([, a], [, b]) => a.name.localeCompare(b.name));
+
+            sortedCountries.forEach(([code, country]) => {
+                const div = document.createElement('div');
+                div.className = `country-item ${code === gameState.currentPlayer ? 'selected' : ''}`;
+                div.dataset.country = code;
+
+                div.innerHTML = `
+                    <div class="country-flag" style="background: ${country.color}"></div>
+                    <span class="country-name">${country.name}</span>
+                    <span class="country-stats">⚔️ ${country.army}</span>
+                `;
+
+                div.addEventListener('click', () => selectCountry(code));
+                container.appendChild(div);
+            });
+        }
+
+        // Выбор страны
+        function selectCountry(countryCode) {
+            gameState.selectedRegion = null;
+            
+            // Снимаем выделение со всех регионов
+            document.querySelectorAll('.region').forEach(r => {
+                r.classList.remove('selected');
+            });
+
+            // Обновляем подсветку в списке
+            document.querySelectorAll('.country-item').forEach(item => {
+                item.classList.toggle('selected', item.dataset.country === countryCode);
+            });
+
+            // Показываем информацию о стране
+            const country = gameState.countries[countryCode];
+            document.getElementById('selectedInfo').innerHTML = `
+                <h3>🏰 ${country.name}</h3>
+                <div class="info-row">
+                    <span>Столица:</span>
+                    <span class="info-value">${country.capital}</span>
+                </div>
+                <div class="info-row">
+                    <span>💰 Золото:</span>
+                    <span class="info-value">${country.gold}</span>
+                </div>
+                <div class="info-row">
+                    <span>🌾 Еда:</span>
+                    <span class="info-value">${country.food}</span>
+                </div>
+                <div class="info-row">
+                    <span>⚔️ Армия:</span>
+                    <span class="info-value">${country.army}</span>
+                </div>
+                <div class="info-row">
+                    <span>🔬 Технологии:</span>
+                    <span class="info-value">${country.tech}</span>
+                </div>
+            `;
+
+            updateActionPanel();
+        }
+
+        // Настройка обработчиков кликов на карте
+        function setupMapClickHandlers() {
+            document.querySelectorAll('.region').forEach(region => {
+                region.addEventListener('click', function(e) {
+                    const countryCode = this.dataset.country;
+                    const countryName = this.dataset.name || gameState.countries[countryCode]?.name || 'Unknown';
+                    
+                    // Снимаем выделение со всех регионов
+                    document.querySelectorAll('.region').forEach(r => {
+                        r.classList.remove('selected');
+                    });
+
+                    // Выделяем выбранный регион
+                    this.classList.add('selected');
+
+                    // Сохраняем выбранный регион
+                    gameState.selectedRegion = {
+                        code: countryCode,
+                        name: countryName
+                    };
+
+                    // Показываем информацию о регионе
+                    const country = gameState.countries[countryCode];
+                    if (country) {
+                        document.getElementById('selectedInfo').innerHTML = `
+                            <h3>🗺️ ${countryName}</h3>
+                            <div class="info-row">
+                                <span>Владелец:</span>
+                                <span class="info-value">${country.name}</span>
+                            </div>
+                            <div class="info-row">
+                                <span>💰 Золото:</span>
+                                <span class="info-value">${country.gold}</span>
+                            </div>
+                            <div class="info-row">
+                                <span>⚔️ Армия:</span>
+                                <span class="info-value">${country.army}</span>
+                            </div>
+                        `;
+                    }
+
+                    updateActionPanel();
+                });
+            });
+        }
+
+        // Обновление панели действий
+        function updateActionPanel() {
+            const container = document.getElementById('actionButtons');
+            const player = gameState.countries[gameState.currentPlayer];
+            const region = gameState.selectedRegion;
+
+            let html = '';
+
+            if (!region) {
+                html = '<p style="color: #aab3d9; text-align: center;">👆 Выберите регион на карте</p>';
+            } else if (region.code === gameState.currentPlayer) {
+                // Свой регион
+                html = `
+                    <button class="action-btn" onclick="developRegion()" ${player.gold < 150 ? 'disabled' : ''}>
+                        <span>📈</span> Развивать регион
+                        <span class="cost-badge">150💰</span>
+                    </button>
+                    <button class="action-btn" onclick="recruitTroops()" ${player.gold < 250 ? 'disabled' : ''}>
+                        <span>⚔️</span> Набрать войска
+                        <span class="cost-badge">250💰</span>
+                    </button>
+                    <button class="action-btn" onclick="buildFort()" ${player.gold < 300 ? 'disabled' : ''}>
+                        <span>🏰</span> Построить крепость
+                        <span class="cost-badge">300💰</span>
+                    </button>
+                `;
+            } else {
+                // Чужой регион
+                const enemy = gameState.countries[region.code];
+                if (enemy) {
+                    const canAttack = player.army > enemy.army * 0.7;
+                    
+                    html = `
+                        <button class="action-btn attack" onclick="attackRegion()" ${!canAttack ? 'disabled' : ''}>
+                            <span>⚔️</span> Атаковать
+                            <span class="cost-badge">${enemy.army}⚔️ vs ${player.army}⚔️</span>
+                        </button>
+                        ${!canAttack ? '<p class="warning">⚠️ Слишком опасно! Нужно больше войск</p>' : ''}
+                    `;
+                }
+            }
+
+            // Кнопка исследования технологий (доступна всегда)
+            const techCost = player.tech * 400;
+            html += `
+                <button class="action-btn" onclick="researchTech()" ${player.gold < techCost ? 'disabled' : ''}>
+                    <span>🔬</span> Исследовать технологии
+                    <span class="cost-badge">${techCost}💰</span>
+                </button>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        // Функции действий
+        function developRegion() {
+            const player = gameState.countries[gameState.currentPlayer];
+            if (player.gold >= 150) {
+                player.gold -= 150;
+                showMessage(`✅ Регион развит! +10 дохода`, 'success');
+                updateResourcesDisplay();
+                updateActionPanel();
+            }
+        }
+
+        function recruitTroops() {
+            const player = gameState.countries[gameState.currentPlayer];
+            if (player.gold >= 250) {
+                player.gold -= 250;
+                player.army += 8;
+                showMessage(`✅ Набрано 8 новых войск! Армия: ${player.army}`, 'success');
+                updateResourcesDisplay();
+                updateActionPanel();
+                createCountriesList(); // Обновляем список
+            }
+        }
+
+        function buildFort() {
+            const player = gameState.countries[gameState.currentPlayer];
+            if (player.gold >= 300) {
+                player.gold -= 300;
+                showMessage(`✅ Построена крепость! Защита +20%`, 'success');
+                updateResourcesDisplay();
+                updateActionPanel();
+            }
+        }
+
+        function attackRegion() {
+            const player = gameState.countries[gameState.currentPlayer];
+            const region = gameState.selectedRegion;
+            const enemy = gameState.countries[region.code];
+
+            if (!enemy) return;
+
+            // Расчет битвы
+            const playerPower = player.army * player.tech;
+            const enemyPower = enemy.army * enemy.tech;
+
+            let message = '';
+            let success = false;
+
+            if (playerPower > enemyPower) {
+                // Победа
+                const losses = Math.floor(player.army * 0.3);
+                player.army -= losses;
+                enemy.army = Math.floor(enemy.army * 0.3);
+                
+                // Захватываем регион
+                const regionElement = document.querySelector(`[data-country="${region.code}"]`);
+                if (regionElement) {
+                    regionElement.setAttribute('fill', player.color);
+                    regionElement.dataset.country = gameState.currentPlayer;
+                }
+                
+                message = `✅ Победа! Захвачен регион ${region.name}. Потери: ${losses}`;
+                success = true;
+            } else {
+                // Поражение
+                const losses = Math.floor(player.army * 0.5);
+                player.army -= losses;
+                message = `❌ Поражение! Потеряно ${losses} войск`;
+            }
+
+            showMessage(message, success ? 'success' : 'error');
+            updateResourcesDisplay();
+            updateActionPanel();
+            createCountriesList();
+        }
+
+        function researchTech() {
+            const player = gameState.countries[gameState.currentPlayer];
+            const cost = player.tech * 400;
+
+            if (player.gold >= cost) {
+                player.gold -= cost;
+                player.tech += 1;
+                showMessage(`✅ Исследован уровень ${player.tech} технологий!`, 'success');
+                updateResourcesDisplay();
+                updateActionPanel();
+            }
+        }
+
+        // Завершение хода
+        function endTurn() {
+            gameState.turn++;
+
+            // Производство ресурсов для всех стран
+            Object.values(gameState.countries).forEach(country => {
+                country.gold += 100 + (country.tech * 20);
+                country.food += 50;
+                country.army = Math.min(country.army + 2, 100); // Лимит армии 100
+            });
+
+            updateResourcesDisplay();
+            document.getElementById('turn').textContent = gameState.turn;
+            showMessage(`🔄 Ход ${gameState.turn} начался!`, 'success');
+            updateActionPanel();
+            createCountriesList();
+        }
+
+        // Обновление отображения ресурсов
+        function updateResourcesDisplay() {
+            const player = gameState.countries[gameState.currentPlayer];
+            document.getElementById('gold').textContent = player.gold;
+            document.getElementById('food').textContent = player.food;
+            document.getElementById('army').textContent = player.army;
+            document.getElementById('tech').textContent = player.tech;
+        }
+
+        // Показ сообщений
+        function showMessage(text, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = text;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Модальное окно
+        function showConfirm(title, message, onConfirm) {
+            const modal = document.getElementById('confirmModal');
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').textContent = message;
+            modal.classList.add('active');
+
+            const confirmHandler = () => {
+                onConfirm();
+                modal.classList.remove('active');
+                document.getElementById('modalConfirm').removeEventListener('click', confirmHandler);
+                document.getElementById('modalCancel').removeEventListener('click', cancelHandler);
+            };
+
+            const cancelHandler = () => {
+                modal.classList.remove('active');
+                document.getElementById('modalConfirm').removeEventListener('click', confirmHandler);
+                document.getElementById('modalCancel').removeEventListener('click', cancelHandler);
+            };
+
+            document.getElementById('modalConfirm').addEventListener('click', confirmHandler);
+            document.getElementById('modalCancel').addEventListener('click', cancelHandler);
+        }
+
+        // Запуск игры при загрузке
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
