@@ -1,0 +1,261 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.game-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: #1a1a2e;
+}
+
+/* Шапка */
+.header {
+    background: #16213e;
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid #0f3460;
+}
+
+.resources {
+    display: flex;
+    gap: 30px;
+}
+
+.resource {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.2em;
+    background: #0f3460;
+    padding: 8px 15px;
+    border-radius: 20px;
+}
+
+.icon {
+    font-size: 1.3em;
+}
+
+.turn-control {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 1.2em;
+}
+
+.btn {
+    background: #e94560;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background 0.3s;
+}
+
+.btn:hover {
+    background: #c73e54;
+}
+
+.btn:disabled {
+    background: #4a4a4a;
+    cursor: not-allowed;
+}
+
+/* Основная область */
+.main-area {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Боковая панель */
+.sidebar {
+    width: 250px;
+    background: #16213e;
+    color: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+}
+
+.countries-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.country-item {
+    padding: 10px;
+    background: #1f2a48;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-left: 4px solid transparent;
+}
+
+.country-item:hover {
+    background: #2a3a5e;
+    transform: translateX(5px);
+}
+
+.country-item.selected {
+    background: #2a3a5e;
+    border-left-color: #e94560;
+}
+
+.country-color {
+    width: 15px;
+    height: 15px;
+    border-radius: 3px;
+}
+
+.country-name {
+    flex: 1;
+}
+
+.country-army {
+    background: #e94560;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 0.8em;
+}
+
+.selected-info {
+    background: #1f2a48;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: auto;
+}
+
+/* Карта */
+.map-container {
+    flex: 1;
+    background: #0a1929;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+#europeMap {
+    width: 100%;
+    height: 100%;
+    background: #1e3d5e;
+    border-radius: 10px;
+}
+
+.region {
+    transition: all 0.3s;
+    cursor: pointer;
+    stroke: #333;
+    stroke-width: 1;
+}
+
+.region:hover {
+    filter: brightness(1.2);
+    stroke: white;
+    stroke-width: 2;
+}
+
+.region.selected {
+    stroke: #e94560;
+    stroke-width: 3;
+}
+
+/* Панель действий */
+.action-panel {
+    width: 250px;
+    background: #16213e;
+    color: white;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.action-panel h3 {
+    margin-bottom: 15px;
+    color: #e94560;
+}
+
+.action-btn {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: #1f2a48;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.action-btn:hover:not(:disabled) {
+    background: #2a3a5e;
+    transform: translateX(5px);
+}
+
+.action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.action-btn.cost {
+    border-left: 3px solid #e94560;
+}
+
+.cost-badge {
+    margin-left: auto;
+    background: #0f3460;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 0.8em;
+}
+
+/* Модальное окно */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: #16213e;
+    color: white;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 400px;
+    width: 90%;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
