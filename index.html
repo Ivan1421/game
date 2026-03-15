@@ -3,66 +3,681 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Европейская стратегия</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Европа: Битва за континент</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cinzel', 'Georgia', serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0f1e 0%, #1a1f2e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&display=swap');
+
+        .game-wrapper {
+            width: 1600px;
+            max-width: 100%;
+            background: rgba(10, 15, 30, 0.9);
+            border-radius: 30px;
+            padding: 20px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8), 0 0 0 2px #2a3045 inset;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Шапка с ресурсами */
+        .header {
+            background: linear-gradient(180deg, #232845 0%, #14182f 100%);
+            border-radius: 20px;
+            padding: 15px 30px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid #3f4a7a;
+            box-shadow: 0 5px 0 #0a0d1a;
+            position: relative;
+        }
+
+        .header::before {
+            content: "⚔️ IMPERIUM EUROPA ⚔️";
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #e94560;
+            color: white;
+            padding: 5px 30px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            box-shadow: 0 3px 0 #8a1f2f;
+            text-shadow: 0 1px 2px black;
+        }
+
+        .resources {
+            display: flex;
+            gap: 20px;
+        }
+
+        .resource {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #0b0f21;
+            padding: 12px 25px;
+            border-radius: 15px;
+            border: 1px solid #4f5a8f;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5), 0 3px 0 #1f2440;
+            transition: all 0.2s;
+        }
+
+        .resource:hover {
+            transform: translateY(-2px);
+            border-color: #e94560;
+            box-shadow: 0 5px 0 #1f2440;
+        }
+
+        .resource-icon {
+            font-size: 1.8em;
+        }
+
+        .resource-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .resource-label {
+            font-size: 0.8em;
+            color: #aab3d9;
+            text-transform: uppercase;
+        }
+
+        .resource-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 2px 3px black;
+            line-height: 1;
+        }
+
+        .turn-box {
+            background: #0b0f21;
+            padding: 10px 25px;
+            border-radius: 15px;
+            border: 1px solid #4f5a8f;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .turn-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #e94560;
+            text-shadow: 0 2px 0 #8a1f2f;
+        }
+
+        .btn {
+            background: linear-gradient(180deg, #e94560 0%, #b32b41 100%);
+            border: none;
+            color: white;
+            font-weight: bold;
+            padding: 12px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 3px solid #6e1a2a;
+            transition: all 0.1s;
+            font-family: 'Cinzel', serif;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+            border-bottom-width: 1px;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(180deg, #3f4a7a 0%, #262e50 100%);
+            border-bottom-color: #12172f;
+        }
+
+        /* Основная область */
+        .main-area {
+            display: flex;
+            gap: 20px;
+            min-height: 600px;
+        }
+
+        /* Боковая панель */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #1b203a 0%, #12172c 100%);
+            border-radius: 20px;
+            padding: 20px;
+            border: 2px solid #3f4a7a;
+            box-shadow: 0 5px 0 #0a0d1a;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar h2 {
+            color: #e94560;
+            font-size: 1.3em;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3f4a7a;
+            letter-spacing: 2px;
+        }
+
+        .countries-list {
+            max-height: 400px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding-right: 5px;
+        }
+
+        .countries-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .countries-list::-webkit-scrollbar-track {
+            background: #1f2440;
+            border-radius: 10px;
+        }
+
+        .countries-list::-webkit-scrollbar-thumb {
+            background: #e94560;
+            border-radius: 10px;
+        }
+
+        .country-item {
+            background: #262e50;
+            padding: 10px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid transparent;
+            border-bottom: 2px solid #12172f;
+        }
+
+        .country-item:hover {
+            background: #2f3860;
+            transform: translateX(3px);
+        }
+
+        .country-item.selected {
+            border-left-color: #e94560;
+            background: #2f3860;
+            box-shadow: 0 0 15px rgba(233, 69, 96, 0.3);
+        }
+
+        .country-flag {
+            width: 24px;
+            height: 16px;
+            background: #fff;
+            border-radius: 3px;
+            box-shadow: 0 2px 3px black;
+        }
+
+        .country-name {
+            flex: 1;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .country-stats {
+            font-size: 0.8em;
+            background: #1a1f3a;
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        .info-panel {
+            background: #1a1f3a;
+            border-radius: 15px;
+            padding: 15px;
+            border: 1px solid #3f4a7a;
+            margin-top: auto;
+        }
+
+        .info-panel h3 {
+            color: #e94560;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            color: #aab3d9;
+        }
+
+        .info-value {
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Карта */
+        .map-container {
+            flex: 1;
+            background: #0a1a2f;
+            border-radius: 20px;
+            padding: 20px;
+            border: 2px solid #3f4a7a;
+            box-shadow: 0 5px 0 #0a0d1a;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .map-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(10, 30, 50, 0.3), rgba(0, 5, 15, 0.7));
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        #europeMap {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.5));
+            position: relative;
+            z-index: 2;
+        }
+
+        .region {
+            transition: all 0.3s;
+            cursor: pointer;
+            stroke: #2a3045;
+            stroke-width: 1.5;
+        }
+
+        .region:hover {
+            filter: brightness(1.3);
+            stroke: #e94560;
+            stroke-width: 2;
+            filter: drop-shadow(0 0 8px rgba(233, 69, 96, 0.5));
+        }
+
+        .region.selected {
+            stroke: #e94560;
+            stroke-width: 3;
+            filter: drop-shadow(0 0 12px #e94560);
+        }
+
+        /* Панель действий */
+        .action-panel {
+            width: 280px;
+            background: linear-gradient(180deg, #1b203a 0%, #12172c 100%);
+            border-radius: 20px;
+            padding: 20px;
+            border: 2px solid #3f4a7a;
+            box-shadow: 0 5px 0 #0a0d1a;
+        }
+
+        .action-panel h3 {
+            color: #e94560;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #3f4a7a;
+            padding-bottom: 10px;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: linear-gradient(180deg, #2f3860 0%, #1f2645 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1em;
+            border-bottom: 3px solid #12172f;
+            font-family: 'Cinzel', serif;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            background: linear-gradient(180deg, #3f4a7a 0%, #2f3860 100%);
+            border-bottom-color: #1f2645;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .action-btn.attack {
+            background: linear-gradient(180deg, #b32b41 0%, #8a1f2f 100%);
+            border-bottom-color: #4a121f;
+        }
+
+        .cost-badge {
+            margin-left: auto;
+            background: #0b0f21;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            border: 1px solid #4f5a8f;
+        }
+
+        .warning {
+            color: #e94560;
+            font-size: 0.9em;
+            text-align: center;
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(233, 69, 96, 0.1);
+            border-radius: 8px;
+            border: 1px solid #e94560;
+        }
+
+        /* Модальное окно */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(180deg, #1b203a 0%, #12172c 100%);
+            padding: 30px;
+            border-radius: 20px;
+            border: 3px solid #e94560;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            color: white;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Cinzel', serif;
+        }
+
+        .modal-btn.yes {
+            background: #e94560;
+            color: white;
+        }
+
+        .modal-btn.no {
+            background: #3f4a7a;
+            color: white;
+        }
+
+        /* Анимации */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #1b203a;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            border-left: 5px solid #e94560;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            animation: slideIn 0.3s;
+            z-index: 2000;
+            font-weight: bold;
+        }
+
+        .toast.success {
+            border-left-color: #00c851;
+        }
+
+        .toast.error {
+            border-left-color: #e94560;
+        }
+    </style>
 </head>
 <body>
-    <div class="game-container">
+    <div class="game-wrapper">
         <!-- Шапка с ресурсами -->
         <div class="header">
             <div class="resources">
                 <div class="resource">
-                    <span class="icon">💰</span>
-                    <span id="gold">1000</span>
+                    <span class="resource-icon">💰</span>
+                    <div class="resource-info">
+                        <span class="resource-label">Золото</span>
+                        <span class="resource-value" id="gold">1000</span>
+                    </div>
                 </div>
                 <div class="resource">
-                    <span class="icon">🌾</span>
-                    <span id="food">500</span>
+                    <span class="resource-icon">🌾</span>
+                    <div class="resource-info">
+                        <span class="resource-label">Еда</span>
+                        <span class="resource-value" id="food">500</span>
+                    </div>
                 </div>
                 <div class="resource">
-                    <span class="icon">⚔️</span>
-                    <span id="army">10</span>
+                    <span class="resource-icon">⚔️</span>
+                    <div class="resource-info">
+                        <span class="resource-label">Армия</span>
+                        <span class="resource-value" id="army">50</span>
+                    </div>
                 </div>
                 <div class="resource">
-                    <span class="icon">🔬</span>
-                    <span id="tech">1</span>
+                    <span class="resource-icon">🔬</span>
+                    <div class="resource-info">
+                        <span class="resource-label">Технологии</span>
+                        <span class="resource-value" id="tech">1</span>
+                    </div>
                 </div>
             </div>
-            <div class="turn-control">
-                Ход: <span id="turn">1</span>
-                <button id="endTurnBtn" class="btn">Завершить ход</button>
+            <div class="turn-box">
+                <span>Ход</span>
+                <span class="turn-number" id="turn">1</span>
+                <button class="btn" id="endTurnBtn">Завершить ход</button>
             </div>
         </div>
 
-        <!-- Основная область: карта и информация -->
+        <!-- Основная область -->
         <div class="main-area">
-            <!-- Боковая панель со списком стран -->
+            <!-- Левая панель (список стран) -->
             <div class="sidebar">
-                <h2>Страны Европы</h2>
-                <div id="countriesList" class="countries-list">
-                    <!-- Будут добавлены через JavaScript -->
+                <h2>⚔️ СТРАНЫ ЕВРОПЫ ⚔️</h2>
+                <div class="countries-list" id="countriesList">
+                    <!-- Список будет заполнен через JavaScript -->
                 </div>
                 
-                <div class="selected-info" id="selectedInfo">
-                    <h3>Выберите страну</h3>
+                <div class="info-panel" id="selectedInfo">
+                    <h3>🏰 ИНФОРМАЦИЯ</h3>
+                    <div class="info-row">
+                        <span>Выберите страну</span>
+                        <span class="info-value">на карте</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Карта (SVG) -->
+            <!-- Карта Европы -->
             <div class="map-container">
-                <svg id="europeMap" viewBox="0 0 1000 800">
-                    <!-- Здесь будут регионы -->
+                <svg id="europeMap" viewBox="0 0 1000 800" preserveAspectRatio="xMidYMid meet">
+                    <!-- Британские острова -->
+                    <path class="region" data-country="GB" d="M120,120 L160,100 L200,110 L210,150 L180,180 L130,170 L100,150 Z" fill="#1E3A8A" data-name="United Kingdom"/>
+                    <path class="region" data-country="IE" d="M70,130 L100,120 L120,150 L100,180 L60,170 L50,150 Z" fill="#169B62" data-name="Ireland"/>
+                    <path class="region" data-country="IS" d="M50,30 L80,20 L110,40 L90,70 L40,60 L30,40 Z" fill="#003897" data-name="Iceland"/>
+                    
+                    <!-- Скандинавия -->
+                    <path class="region" data-country="NO" d="M280,30 L340,20 L380,40 L370,80 L330,100 L280,90 L250,60 Z" fill="#BA0C2F" data-name="Norway"/>
+                    <path class="region" data-country="SE" d="M370,40 L420,30 L460,60 L440,100 L400,110 L360,80 L350,50 Z" fill="#006AA7" data-name="Sweden"/>
+                    <path class="region" data-country="FI" d="M430,40 L480,30 L520,60 L500,110 L460,120 L420,90 L410,60 Z" fill="#003580" data-name="Finland"/>
+                    <path class="region" data-country="DK" d="M320,120 L360,110 L380,140 L350,160 L310,150 L300,130 Z" fill="#C8102E" data-name="Denmark"/>
+                    
+                    <!-- Прибалтика -->
+                    <path class="region" data-country="EE" d="M430,120 L470,110 L490,140 L450,160 L420,150 L410,130 Z" fill="#4891D9" data-name="Estonia"/>
+                    <path class="region" data-country="LV" d="M440,160 L480,150 L500,180 L460,200 L430,190 L420,170 Z" fill="#9E3039" data-name="Latvia"/>
+                    <path class="region" data-country="LT" d="M450,200 L490,190 L510,220 L470,240 L440,230 L430,210 Z" fill="#FDB913" data-name="Lithuania"/>
+                    
+                    <!-- Западная Европа -->
+                    <path class="region" data-country="FR" d="M220,300 L280,280 L320,310 L300,360 L240,380 L200,360 L180,320 Z" fill="#0055A4" data-name="France"/>
+                    <path class="region" data-country="BE" d="M280,260 L310,250 L330,270 L320,300 L290,290 L270,280 Z" fill="#000000" data-name="Belgium"/>
+                    <path class="region" data-country="NL" d="M290,230 L320,220 L340,240 L330,270 L300,260 L280,250 Z" fill="#AE1C28" data-name="Netherlands"/>
+                    <path class="region" data-country="LU" d="M310,270 L330,260 L340,280 L320,290 L300,280 Z" fill="#00A2E1" data-name="Luxembourg"/>
+                    <path class="region" data-country="CH" d="M320,330 L350,320 L370,340 L340,360 L310,350 L300,340 Z" fill="#FF0000" data-name="Switzerland"/>
+                    <path class="region" data-country="AT" d="M380,310 L410,300 L430,320 L400,340 L370,330 L360,310 Z" fill="#ED2939" data-name="Austria"/>
+                    <path class="region" data-country="DE" d="M330,230 L380,210 L410,240 L400,280 L360,290 L320,270 L300,240 Z" fill="#000000" data-name="Germany"/>
+                    
+                    <!-- Восточная Европа -->
+                    <path class="region" data-country="PL" d="M440,240 L490,220 L520,250 L500,290 L460,300 L430,280 L420,250 Z" fill="#DC143C" data-name="Poland"/>
+                    <path class="region" data-country="CZ" d="M400,270 L430,260 L450,280 L420,300 L390,290 L380,280 Z" fill="#11457E" data-name="Czech Rep."/>
+                    <path class="region" data-country="SK" d="M440,290 L470,280 L490,300 L460,320 L430,310 L420,300 Z" fill="#0B4EA2" data-name="Slovakia"/>
+                    <path class="region" data-country="HU" d="M440,330 L470,320 L490,340 L460,360 L430,350 L420,340 Z" fill="#436F4D" data-name="Hungary"/>
+                    <path class="region" data-country="BY" d="M500,210 L540,190 L570,220 L550,260 L510,270 L490,240 L480,220 Z" fill="#D22730" data-name="Belarus"/>
+                    <path class="region" data-country="UA" d="M520,270 L590,240 L630,270 L610,330 L550,350 L510,330 L500,290 Z" fill="#FFD700" data-name="Ukraine"/>
+                    <path class="region" data-country="MD" d="M560,340 L590,330 L600,360 L570,370 L550,360 L540,350 Z" fill="#0033A0" data-name="Moldova"/>
+                    
+                    <!-- Пиренейский полуостров -->
+                    <path class="region" data-country="ES" d="M120,400 L190,370 L230,410 L200,470 L140,490 L90,470 L70,430 Z" fill="#AA151B" data-name="Spain"/>
+                    <path class="region" data-country="PT" d="M70,410 L110,390 L140,420 L120,460 L80,450 L60,430 Z" fill="#006600" data-name="Portugal"/>
+                    
+                    <!-- Италия и Балканы -->
+                    <path class="region" data-country="IT" d="M320,420 L370,390 L410,420 L400,480 L350,510 L310,490 L290,450 Z" fill="#008C45" data-name="Italy"/>
+                    <path class="region" data-country="SI" d="M390,370 L410,360 L420,380 L400,390 L380,385 L370,380 Z" fill="#FF0000" data-name="Slovenia"/>
+                    <path class="region" data-country="HR" d="M410,390 L440,380 L460,400 L430,420 L400,410 L390,400 Z" fill="#FF0000" data-name="Croatia"/>
+                    <path class="region" data-country="BA" d="M420,410 L450,400 L470,420 L440,440 L410,430 L400,420 Z" fill="#003399" data-name="Bosnia and Herz."/>
+                    <path class="region" data-country="ME" d="M440,430 L470,420 L480,440 L450,450 L430,440 L430,440 Z" fill="#D4A017" data-name="Montenegro"/>
+                    <path class="region" data-country="RS" d="M470,400 L510,380 L530,410 L500,430 L460,420 L450,410 Z" fill="#003399" data-name="Serbia"/>
+                    <path class="region" data-country="MK" d="M480,430 L510,420 L520,440 L490,450 L470,440 L470,440 Z" fill="#D61E2C" data-name="Macedonia"/>
+                    <path class="region" data-country="AL" d="M470,450 L500,440 L510,460 L480,470 L460,460 L460,460 Z" fill="#E41E20" data-name="Albania"/>
+                    <path class="region" data-country="GR" d="M490,470 L540,450 L570,480 L530,520 L480,510 L470,480 Z" fill="#0D5EAF" data-name="Greece"/>
+                    <path class="region" data-country="BG" d="M530,400 L570,380 L600,410 L570,430 L540,420 L520,410 Z" fill="#FFFFFF" data-name="Bulgaria"/>
+                    <path class="region" data-country="RO" d="M530,350 L580,330 L620,360 L600,390 L560,380 L530,370 L520,360 Z" fill="#002B7F" data-name="Romania"/>
                 </svg>
             </div>
 
-            <!-- Панель действий -->
-            <div class="action-panel" id="actionPanel">
-                <h3>Действия</h3>
-                <div id="actionButtons"></div>
+            <!-- Правая панель (действия) -->
+            <div class="action-panel">
+                <h3>⚡ ДЕЙСТВИЯ ⚡</h3>
+                <div id="actionButtons">
+                    <p style="color: #aab3d9; text-align: center;">Выберите регион на карте</p>
+                </div>
             </div>
         </div>
     </div>
 
-    <script src="script.js"></script>
-</body>
-</html>
+    <!-- Модальное окно подтверждения -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Подтверждение</h3>
+            <p id="modalMessage"></p>
+            <div class="modal-buttons">
+                <button class="modal-btn yes" id="modalConfirm">Да</button>
+                <button class="modal-btn no" id="modalCancel">Нет</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Данные о странах из твоего JSON
+        const countriesData = {
+            "AL": { name: "Albania", color: "#E41E20", gold: 400, food: 300, army: 8, tech: 1, capital: "Tirana" },
+            "AT": { name: "Austria", color: "#ED2939", gold: 800, food: 400, army: 12, tech: 2, capital: "Vienna" },
+            "BE": { name: "Belgium", color: "#000000", gold: 1000, food: 500, army: 10, tech: 2, capital: "Brussels" },
+            "BG": { name: "Bulgaria", color: "#FFFFFF", gold: 500, food: 450, army: 15, tech: 1, capital: "Sofia" },
+            "BA": { name: "Bosnia and Herz.", color: "#003399", gold: 350, food: 350, army: 9, tech: 1, capital: "Sarajevo" },
+            "BY": { name: "Belarus", color: "#D22730", gold: 450, food: 500, army: 20, tech: 1, capital: "Minsk" },
+            "CH": { name: "Switzerland", color: "#FF0000", gold: 1500, food: 300, army: 5, tech: 3, capital: "Bern" },
+            "CZ": { name: "Czech Rep.", color: "#11457E", gold: 700, food: 450, army: 14, tech: 2, capital: "Prague" },
+            "DE": { name: "Germany", color: "#000000", gold: 1500, food: 700, army: 30, tech: 3, capital: "Berlin" },
+            "DK": { name: "Denmark", color: "#C8102E", gold: 900, food: 400, army: 12, tech: 2, capital: "Copenhagen" },
+            "EE": { name: "Estonia", color: "#4891D9", gold: 500, food: 300, army: 7, tech: 2, capital: "Tallinn" },
+            "FI": { name: "Finland", color: "#003580", gold: 800, food: 400, army: 15, tech: 2, capital: "Helsinki" },
+            "GB": { name: "United Kingdom", color: "#1E3A8A", gold: 1600, food: 500, army: 28, tech: 3, capital: "London" },
+            "GR": { name: "Greece", color: "#0D5EAF", gold: 600, food: 500, army: 18, tech: 2, capital: "Athens" },
+            "HR": { name: "Croatia", color: "#FF0000", gold: 550, food: 400, army: 10, tech: 1, capital: "Zagreb" },
+            "HU": { name: "Hungary", color: "#436F4D", gold: 650, food: 550, army: 16, tech: 1, capital: "Budapest" },
+            "IE": { name: "Ireland", color: "#169B62", gold: 700, food: 600, army: 9, tech: 2, capital: "Dublin" },
+            "IS": { name: "Iceland", color: "#003897", gold: 600, food: 200, army: 4, tech: 2, capital: "Reykjavik" },
+            "IT": { name: "Italy", color: "#008C45", gold: 1300, food: 700, army: 25, tech: 2, capital: "Rome" },
+            "LT": { name: "Lithuania", color: "#FDB913", gold: 550, food: 450, army: 12, tech: 1, capital: "Vilnius" },
+            "LU": { name: "Luxembourg", color: "#00A2E1", gold: 2000, food: 200, army: 2, tech: 3, capital: "Luxembourg" },
+            "LV": { name: "Latvia", color: "#9E3039", gold: 500, food: 350, army: 8, tech: 1, capital: "Riga" },
+            "MD": { name: "Moldova", color: "#0033A0", gold: 300, food: 400, army: 7, tech: 1, capital: "Chisinau" },
+            "MK": { name: "Macedonia", color: "#D61E2C", gold: 400, food: 350, army: 8, tech: 1, capital: "Skopje" },
+            "ME": { name: "Montenegro", color: "#D4A017", gold: 350, food: 250, army: 6, tech: 1, capital: "Podgorica" },
+            "NL": { name: "Netherlands", color: "#AE1C28", gold: 1400, food: 500, army: 18, tech: 2, capital: "Amsterdam" },
+            "NO": { name: "Norway", color: "#BA0C2F", gold: 1200, food: 300, army: 16, tech: 2, capital: "Oslo" },
+            "PL": { name: "Poland", color: "#DC143C", gold: 900, food: 700, army: 30, tech: 1, capital: "Warsaw" },
+            "PT": { name: "Portugal", color: "#006600", gold: 700, food: 500, army: 12, tech: 2, capital: "Lisbon" },
+            "RO": { name: "Romania", color: "#002B7F", gold: 650, food: 600, army: 20, tech: 1, capital: "Bucharest" },
+            "RS": { name: "Serbia", color: "#003399", gold: 500, food: 500, army: 18, tech: 1, capital: "Belgrade" },
+            "SK": { name: "Slovakia", color: "#0B4EA2", gold: 600, food: 450, army: 12, tech: 1, capital: "Bratislava" },
+            "SI": { name: "Slovenia", color: "#FF0000", gold: 550, food: 350, army: 8, tech: 2, capital: "Ljubljana" },
+            "SE": { name: "Sweden", color: "#006AA7", gold: 1100, food: 500, army: 20, tech: 2, capital: "Stockholm" },
+            "UA": { name: "Ukraine", color: "#FFD700", gold: 700, food: 900, army: 40, tech: 1, capital: "Kyiv" },
+            "FR": { name: "France", color: "#0055A4", gold: 1400, food: 800, army: 35, tech: 2, capital: "Paris" },
+            "ES": { name: "Spain", color: "#AA151B", gold: 1200, food: 700, army: 28, tech: 2, capital: "Madrid" }
+        };
+
+        // Состояние игры
+        let gameState = {
+            turn: 1,
+            currentPlayer: "FR", // Игрок
