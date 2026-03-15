@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Европейская стратегия</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- Шапка с ресурсами -->
+        <div class="header">
+            <div class="resources">
+                <div class="resource">
+                    <span class="icon">💰</span>
+                    <span id="gold">1000</span>
+                </div>
+                <div class="resource">
+                    <span class="icon">🌾</span>
+                    <span id="food">500</span>
+                </div>
+                <div class="resource">
+                    <span class="icon">⚔️</span>
+                    <span id="army">10</span>
+                </div>
+                <div class="resource">
+                    <span class="icon">🔬</span>
+                    <span id="tech">1</span>
+                </div>
+            </div>
+            <div class="turn-control">
+                Ход: <span id="turn">1</span>
+                <button id="endTurnBtn" class="btn">Завершить ход</button>
+            </div>
+        </div>
+
+        <!-- Основная область: карта и информация -->
+        <div class="main-area">
+            <!-- Боковая панель со списком стран -->
+            <div class="sidebar">
+                <h2>Страны Европы</h2>
+                <div id="countriesList" class="countries-list">
+                    <!-- Будут добавлены через JavaScript -->
+                </div>
+                
+                <div class="selected-info" id="selectedInfo">
+                    <h3>Выберите страну</h3>
+                </div>
+            </div>
+
+            <!-- Карта (SVG) -->
+            <div class="map-container">
+                <svg id="europeMap" viewBox="0 0 1000 800">
+                    <!-- Здесь будут регионы -->
+                </svg>
+            </div>
+
+            <!-- Панель действий -->
+            <div class="action-panel" id="actionPanel">
+                <h3>Действия</h3>
+                <div id="actionButtons"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
